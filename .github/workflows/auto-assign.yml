@@ -21,7 +21,7 @@ jobs:
           skipKeywords: wip, draft
           skipDraft: true
       - name: 'Auto-assign issue'
-        uses: pozil/auto-assign-issue@v1
+        uses: pozil/auto-assign-issue@v2
         with:
             repo-token: ${{ secrets.GITHUB_TOKEN }}
             assignees: mkpro118
