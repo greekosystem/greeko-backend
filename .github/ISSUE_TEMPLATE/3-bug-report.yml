@@ -1,0 +1,42 @@
+name: Bug Report
+description: "Report a bug"
+assignees: mkpro118
+labels: bug
+title: "Bug: "
+
+body:
+  - type: input
+    id: problem
+    validations:
+      required: true
+    attributes:
+      label: Issue description
+      description: Please provide a clear and concise description of the issue you are facing
+
+  - type: textarea
+    id: detail
+    validations:
+      required: false
+    attributes:
+      label: "(Optional): Provide any additional details"
+      description: |
+        Anything that may help us understand the issue better. You could add
+        - Error messages
+        - Logs
+        - Screenshots
+
+  - type: textarea
+    id: steps-repro
+    validations:
+      required: true
+    attributes:
+      label: Steps to reproduce the issue
+      description: Please list the steps we can take to replicate the issue you are facing.
+        
+  - type: checkboxes
+    id: seen-existing-issues
+    attributes:
+      label: Please confirm you have checked for similar existing issues
+      options:
+        - label: I have confirmed there are no similar existing issues.
+          required: true
