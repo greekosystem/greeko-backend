@@ -1,0 +1,13 @@
+name: Auto Assign PRs
+on:
+  pull_request:
+    types: [opened, ready_for_review]
+jobs:
+  auto-assign:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - uses: twoequal0/auto-assign-bot@v1.3.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: '.github/auto-assign-pr.yml'
