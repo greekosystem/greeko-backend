@@ -19,6 +19,16 @@ on:
           - warning
           - error
           - critical
+      file:
+        description: File to read from/write to
+        required: false
+        type: string
+        default: "docs/user-stories/README.md"
+      skip-lines:
+        description: Number of lines to skip in the file
+        required: false
+        type: string
+        default: "2"
       issue-number:
         description: Related Issue Number
         required: true
@@ -38,6 +48,10 @@ env:
   MK_USERNAME: ${{ secrets.MK_USERNAME }}
   MK_EMAIL: ${{ secrets.MK_EMAIL }}
   PYTHONPATH: ${{ github.workspace }}/.github/scripts/
+  USER_STORY_FILE: ${{ github.workspace }}/docs/user-stories/README.md
+  USER_STORY_LOG_LEVEL: error
+  USER_STORY_SKIP_LINES: 2
+  USER_STORY_CREATE_STATUS: In-Progress
 
 jobs:
   add-user-story:
@@ -57,19 +71,27 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Setup User Story
+        run: pip install git+https://github.com/mkpro118/auto-build-user-stories.git@v1.1.0
+
       - name: Add User Story to Document
         if: ${{ github.event_name == 'issues' }}
         run: |
-          python .github/scripts/user_story.py --log-level debug create \
+          user_story --log-level $USER_STORY_LOG_LEVEL \
+            --file $USER_STORY_FILE \
+            --skip-lines $USER_STORY_SKIP_LINES \
+            create \
             --issue-number ${{ github.event.issue.number }} \
             --url ${{ github.event.issue.html_url }} \
-            --status "In-Progress" \
+            --status $USER_STORY_CREATE_STATUS \
             --content "${{ github.event.issue.body }}"
 
       - name: Add User Story to Document (manual dispatch)
         if: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
-          python .github/scripts/user_story.py --log-level ${{ inputs.log-level }} \
+          user_story --log-level ${{ inputs.log-level }} \
+            --file ${{ inputs.file }} \
+            --skip-lines ${{ inputs.skip-lines }} \
             create \
             --issue-number ${{ inputs.issue_number }} \
             --url ${{ inputs.issue-url }} \
@@ -80,13 +102,11 @@ jobs:
         run: |
           git config --local user.name ${MK_USERNAME}
           git config --local user.email ${MK_EMAIL}
-          git add -A
+          git add docs
           if ! git diff-index --quiet HEAD; then
             echo "Changes detected. Committing..."
-            git commit -m "Updated User Stories [mkpro118-bot: auto-built]"
+            git commit -m "Updated User Stories [auto-built]"
             git push -f origin main
           else
             echo "No changes detected."
           fi
-
-
