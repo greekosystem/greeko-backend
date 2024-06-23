@@ -1,0 +1,92 @@
+name: Add New User Story
+
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+    inputs:
+      content:
+        description: Description of the User Story
+        required: true
+        type: string
+      log-level:
+        description: Log Level
+        required: true
+        type: choice
+        options:
+          - debug
+          - info
+          - warning
+          - error
+          - critical
+      issue-number:
+        description: Related Issue Number
+        required: true
+        type: string
+      issue-url:
+        description: URL of the related issue
+        required: true
+        type: string
+      status:
+        description: Status of the user story
+        required: true
+        type: string
+
+permissions: write-all
+
+env:
+  MK_USERNAME: ${{ secrets.MK_USERNAME }}
+  MK_EMAIL: ${{ secrets.MK_EMAIL }}
+  PYTHONPATH: ${{ github.workspace }}/.github/scripts/
+
+jobs:
+  add-user-story:
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.labels.*.name, 'user-story')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Use token to allow force push
+          token: ${{ secrets.MK_TOKEN }}
+          # Make sure the actual branch is checked out when running on pull requests
+          ref: ${{ github.head_ref }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Add User Story to Document
+        if: ${{ github.event_name == 'issues' }}
+        run: |
+          python .github/scripts/user_story.py --log-level debug create \
+            --issue-number ${{ github.event.issue.number }} \
+            --url ${{ github.event.issue.html_url }} \
+            --status "In-Progress" \
+            --content "${{ github.event.issue.body }}"
+
+      - name: Add User Story to Document (manual dispatch)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          python .github/scripts/user_story.py --log-level ${{ inputs.log-level }} \
+            create \
+            --issue-number ${{ inputs.issue_number }} \
+            --url ${{ inputs.issue-url }} \
+            --status ${{ inputs.status }} \
+            --content "${{ inputs.content }}"
+
+      - name: Commit files
+        run: |
+          git config --local user.name ${MK_USERNAME}
+          git config --local user.email ${MK_EMAIL}
+          git add -A
+          if ! git diff-index --quiet HEAD; then
+            echo "Changes detected. Committing..."
+            git commit -m "Updated User Stories [mkpro118-bot: auto-built]"
+            git push -f origin main
+          else
+            echo "No changes detected."
+          fi
+
+
