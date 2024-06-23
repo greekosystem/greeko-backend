@@ -47,7 +47,6 @@ permissions: write-all
 env:
   MK_USERNAME: ${{ secrets.MK_USERNAME }}
   MK_EMAIL: ${{ secrets.MK_EMAIL }}
-  PYTHONPATH: ${{ github.workspace }}/.github/scripts/
   USER_STORY_FILE: ${{ github.workspace }}/docs/user-stories/README.md
   USER_STORY_LOG_LEVEL: error
   USER_STORY_SKIP_LINES: 2
