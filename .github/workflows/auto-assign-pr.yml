@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
-      - uses: twoequal0/auto-assign-bot@v1.3.0
+      - uses: twoequal0/auto-assign-bot@v1.3.1
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           configuration-path: '.github/auto-assign-pr.yml'
